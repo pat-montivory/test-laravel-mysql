@@ -57,7 +57,7 @@ jobs:
           AZURE-STORAGE-ACCOUNT
 
     - name: Deploy to Azure Container Apps
-      uses: azure/container-apps-deploy@v1
+      uses: azure/container-apps-deploy@v2
       with:
         appName: ${{ env.CONTAINER_APP_NAME }}
         resourceGroup: ${{ env.RESOURCE_GROUP }}
