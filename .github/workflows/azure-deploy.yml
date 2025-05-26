@@ -1,0 +1,77 @@
+name: Deploy Laravel to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  CONTAINER_APP_NAME: laravel-app-dev-app  # Matches Terraform naming
+  RESOURCE_GROUP: laravel-app-dev-rg      # Matches Terraform naming
+  LOCATION: eastus
+  DOCKER_REGISTRY: laravelappdevregistry.azurecr.io  # Matches Terraform naming
+  DOCKER_IMAGE_NAME: laravel-app
+  KEY_VAULT_NAME: laravel-app-dev-kv      # Matches Terraform naming
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.DOCKER_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+
+    - name: Get Key Vault Secrets
+      id: get-secrets
+      uses: azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KEY_VAULT_NAME }}
+        secrets: |
+          DB-HOST
+          DB-DATABASE
+          DB-USERNAME
+          DB-PASSWORD
+          AZURE-STORAGE-KEY
+          AZURE-STORAGE-ACCOUNT
+
+    - name: Deploy to Azure Container Apps
+      uses: azure/container-apps-deploy@v1
+      with:
+        appName: ${{ env.CONTAINER_APP_NAME }}
+        resourceGroup: ${{ env.RESOURCE_GROUP }}
+        imageToDeploy: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+        targetPort: 8080
+        ingress: external
+        env-vars: |
+          APP_ENV=production
+          DB_HOST=${{ steps.get-secrets.outputs.DB-HOST }}
+          DB_DATABASE=${{ steps.get-secrets.outputs.DB-DATABASE }}
+          DB_USERNAME=${{ steps.get-secrets.outputs.DB-USERNAME }}
+          DB_PASSWORD=${{ steps.get-secrets.outputs.DB-PASSWORD }}
+          AZURE_STORAGE_KEY=${{ steps.get-secrets.outputs.AZURE-STORAGE-KEY }}
+          AZURE_STORAGE_ACCOUNT=${{ steps.get-secrets.outputs.AZURE-STORAGE-ACCOUNT }}
+
+    - name: Azure logout
+      run: az logout 

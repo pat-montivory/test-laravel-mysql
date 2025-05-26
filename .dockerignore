@@ -1,0 +1,67 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+/vendor
+/node_modules
+package-lock.json
+composer.lock
+
+# Build and cache files
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*
+
+# IDE and editor files
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Testing and documentation
+/tests
+/phpunit.xml
+.phpunit.result.cache
+/docs
+*.md
+!README.md
+
+# Docker related
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Terraform files
+/tf
+*.tf
+*.tfvars
+*.tfstate
+*.tfstate.*
+
+# Build artifacts
+/public/build
+/public/css
+/public/js
+/public/mix-manifest.json
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
