@@ -3,7 +3,7 @@ name: Deploy Laravel to Azure Container Apps
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 env:
@@ -62,7 +62,7 @@ jobs:
         appName: ${{ env.CONTAINER_APP_NAME }}
         resourceGroup: ${{ env.RESOURCE_GROUP }}
         imageToDeploy: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-        targetPort: 8080
+        targetPort: 80
         ingress: external
         env-vars: |
           APP_ENV=production
