@@ -57,21 +57,21 @@ jobs:
           AZURE-STORAGE-ACCOUNT
 
     - name: Deploy to Azure Container Apps
-      uses: azure/container-apps-deploy@v2
-      with:
-        appName: ${{ env.CONTAINER_APP_NAME }}
-        resourceGroup: ${{ env.RESOURCE_GROUP }}
-        imageToDeploy: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-        targetPort: 80
-        ingress: external
-        env-vars: |
-          APP_ENV=production
-          DB_HOST=${{ steps.get-secrets.outputs.DB-HOST }}
-          DB_DATABASE=${{ steps.get-secrets.outputs.DB-DATABASE }}
-          DB_USERNAME=${{ steps.get-secrets.outputs.DB-USERNAME }}
-          DB_PASSWORD=${{ steps.get-secrets.outputs.DB-PASSWORD }}
-          AZURE_STORAGE_KEY=${{ steps.get-secrets.outputs.AZURE-STORAGE-KEY }}
-          AZURE_STORAGE_ACCOUNT=${{ steps.get-secrets.outputs.AZURE-STORAGE-ACCOUNT }}
+      run: |
+        az containerapp update \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} \
+          --target-port 80 \
+          --ingress external \
+          --env-vars \
+            APP_ENV=production \
+            DB_HOST=${{ steps.get-secrets.outputs.DB-HOST }} \
+            DB_DATABASE=${{ steps.get-secrets.outputs.DB-DATABASE }} \
+            DB_USERNAME=${{ steps.get-secrets.outputs.DB-USERNAME }} \
+            DB_PASSWORD=${{ steps.get-secrets.outputs.DB-PASSWORD }} \
+            AZURE_STORAGE_KEY=${{ steps.get-secrets.outputs.AZURE-STORAGE-KEY }} \
+            AZURE_STORAGE_ACCOUNT=${{ steps.get-secrets.outputs.AZURE-STORAGE-ACCOUNT }}
 
     - name: Azure logout
       run: az logout 
